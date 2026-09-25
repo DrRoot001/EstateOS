@@ -7,7 +7,7 @@
  * agent must be able to sell a colleague's listing — while contacts and leads
  * stay scoped to the hierarchy.
  */
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db, schema } from "@/db/client";
 import type { Listing, Property } from "@/db/schema";
 import { matchListings, type MatchCandidate } from "@/lib/matching";
@@ -39,16 +39,7 @@ export async function listProperties(caller: Caller, query = "") {
   const database = await db();
   const like = `%${query.trim().toLowerCase()}%`;
 
-  return database
-    .select({ property: schema.properties, listing: schema.listings })
-    .from(schema.properties)
-    .leftJoin(
-      schema.listings,
-      and(
-        eq(schema.listings.propertyId, schema.properties.id),
-        sql`${schema.listings.status} <> 'Withdrawn'`,
-      ),
-    )
+  const properties = await database.select().from(schema.properties)
     .where(
       and(
         eq(schema.properties.organizationId, caller.org.id),
@@ -59,6 +50,31 @@ export async function listProperties(caller: Caller, query = "") {
     )
     .orderBy(desc(schema.properties.updatedAt))
     .limit(200);
+
+  if (!properties.length) return [];
+
+  const propertyIds = properties.map((property) => property.id);
+  const listings = await database
+    .select()
+    .from(schema.listings)
+    .where(
+      and(
+        eq(schema.listings.organizationId, caller.org.id),
+        inArray(schema.listings.propertyId, propertyIds),
+        sql`${schema.listings.status} <> 'Withdrawn'`,
+      ),
+    )
+    .orderBy(desc(schema.listings.updatedAt));
+
+  const latestListing = new Map<string, (typeof listings)[number]>();
+  for (const listing of listings) {
+    if (!latestListing.has(listing.propertyId)) latestListing.set(listing.propertyId, listing);
+  }
+
+  return properties.map((property) => ({
+    property,
+    listing: latestListing.get(property.id) ?? null,
+  }));
 }
 
 export async function getProperty(caller: Caller, propertyId: string) {

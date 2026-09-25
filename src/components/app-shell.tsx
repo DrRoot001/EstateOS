@@ -27,7 +27,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { signOut, signOutEverywhere } from "@/lib/auth-api";
 import { ROLES, type Permission } from "@/lib/rbac";
 import { useSession } from "@/lib/session";
@@ -167,13 +166,9 @@ export function AppShell({
                 <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
               ) : null}
             </div>
-            <div className="relative hidden md:block">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search leads, listings, offers"
-                className="w-64 pl-9"
-                aria-label="Search"
-              />
+            <div className="hidden items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground md:flex">
+              <Search className="size-3.5" />
+              Global search lands in the search module
             </div>
             {actions}
             <MarketSwitcher />

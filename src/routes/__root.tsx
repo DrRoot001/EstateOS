@@ -94,35 +94,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Broker Dashboard — EstateOS Broker" },
+      { title: "EstateOS" },
       {
         name: "description",
         content:
-          "Live brokerage command center: today's leads, active deals, scheduled viewings, revenue and agent leaderboard.",
+          "Multi-tenant real estate operating system: platform provisioning, organization management, inbox, contacts, leads and inventory.",
       },
-      { property: "og:title", content: "Broker Dashboard — EstateOS Broker" },
+      { property: "og:title", content: "EstateOS" },
       {
         property: "og:description",
         content:
-          "Live brokerage command center: today's leads, active deals, scheduled viewings, revenue and agent leaderboard.",
+          "Multi-tenant real estate operating system for platform operators and customer organizations.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Broker Dashboard — EstateOS Broker" },
+      { name: "twitter:title", content: "EstateOS" },
       {
         name: "twitter:description",
         content:
-          "Live brokerage command center: today's leads, active deals, scheduled viewings, revenue and agent leaderboard.",
-      },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5af87ed8-75a9-49be-895c-544cdd58b2e6/id-preview-7faf875b--c12cb2da-98bc-4852-8965-5f718ffaaed5.lovable.app-1785777233485.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5af87ed8-75a9-49be-895c-544cdd58b2e6/id-preview-7faf875b--c12cb2da-98bc-4852-8965-5f718ffaaed5.lovable.app-1785777233485.png",
+          "Multi-tenant real estate operating system for platform operators and customer organizations.",
       },
     ],
     links: [
