@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut, signOutEverywhere } from "@/lib/auth-api";
-import { MODULE_READINESS, moduleStatusLabel } from "@/lib/module-readiness";
+import { MODULE_READINESS, moduleStatusLabel, type ModuleKey } from "@/lib/module-readiness";
 import { ROLES, type Permission } from "@/lib/rbac";
 import { useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -105,7 +105,7 @@ type NavItem = {
   label: string;
   icon: typeof Home;
   perm?: Permission[];
-  moduleKey?: keyof typeof MODULE_READINESS;
+  moduleKey?: ModuleKey;
 };
 
 export function AppShell({
@@ -149,6 +149,7 @@ export function AppShell({
 
         <nav className="flex-1 space-y-1 px-3">
           {primaryNav.map((item) => (
+            // Keep planned/partial modules visible but explicitly marked.
             <Link
               key={item.to}
               to={item.to}
@@ -283,7 +284,7 @@ export function AppShell({
                 <span className="inline-flex items-center gap-1">
                   {item.label}
                   {item.moduleKey && MODULE_READINESS[item.moduleKey].status !== "ready"
-                    ? " · Planned"
+                    ? ` · ${moduleStatusLabel(MODULE_READINESS[item.moduleKey].status)}`
                     : ""}
                 </span>
               </Link>

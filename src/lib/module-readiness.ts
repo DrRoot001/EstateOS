@@ -6,7 +6,7 @@ export type ModuleReadiness = {
   nextRequired: string[];
 };
 
-export const MODULE_READINESS: Record<string, ModuleReadiness> = {
+export const MODULE_READINESS = {
   dashboard: {
     status: "partial",
     whatWorksNow: [
@@ -105,7 +105,9 @@ export const MODULE_READINESS: Record<string, ModuleReadiness> = {
       "Permission-scoped AI actions over organization data",
     ],
   },
-};
+} satisfies Record<string, ModuleReadiness>;
+
+export type ModuleKey = keyof typeof MODULE_READINESS;
 
 export function moduleStatusLabel(status: ModuleStatus) {
   return status === "ready" ? "Live" : status === "partial" ? "Partial" : "Planned";
