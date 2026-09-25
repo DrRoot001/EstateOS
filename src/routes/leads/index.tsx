@@ -89,7 +89,7 @@ function LeadsPage() {
           icon={Contact}
           title="No leads yet"
           description="A lead is created automatically the moment an enquiry arrives from your website form, email or WhatsApp — attached to the person who sent it, never as a duplicate."
-          action={{ label: "Connect a channel", to: "/settings" }}
+          action={{ label: "Open integrations setup", to: "/settings" }}
         />
       ) : (
         <div className="panel overflow-x-auto">

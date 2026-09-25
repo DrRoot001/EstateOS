@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CalendarDays } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { EmptyState } from "@/components/empty-state";
+import { ModuleReadinessPanel } from "@/components/module-readiness-panel";
+import { MODULE_READINESS } from "@/lib/module-readiness";
 
 export const Route = createFileRoute("/calendar")({
   head: () => ({
@@ -16,12 +18,15 @@ export const Route = createFileRoute("/calendar")({
 function CalendarPage() {
   return (
     <AppShell title="Calendar" subtitle="Viewings and appointments">
-      <EmptyState
-        icon={CalendarDays}
-        title="No viewings scheduled"
-        description="Viewings booked against a lead and a property appear here, synced both ways with the Google or Outlook calendar each agent connects."
-        note="Viewing management is PRD module 10; calendar sync is part of the integration work in Phase 4."
-      />
+      <div className="space-y-4">
+        <ModuleReadinessPanel title="Calendar readiness" readiness={MODULE_READINESS.calendar} />
+        <EmptyState
+          icon={CalendarDays}
+          title="No viewings scheduled"
+          description="Viewings booked against a lead and a property appear here, synced both ways with the Google or Outlook calendar each agent connects."
+          note="This module stays empty until viewing workflows and provider sync are implemented."
+        />
+      </div>
     </AppShell>
   );
 }

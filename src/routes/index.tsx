@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
   Building2,
   Check,
@@ -10,10 +11,13 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { EmptyState } from "@/components/empty-state";
+import { ModuleReadinessPanel } from "@/components/module-readiness-panel";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { fetchLeads, fetchPipeline } from "@/lib/crm-api";
 import { MARKETS, type MarketCode } from "@/lib/markets";
+import { MODULE_READINESS } from "@/lib/module-readiness";
 import { ROLES } from "@/lib/rbac";
 import { useCan, useSession, type Session } from "@/lib/session";
 
@@ -37,6 +41,16 @@ function Dashboard() {
   const scope = ROLES[session.user.role].scope;
   const office = session.offices.find((o) => o.id === session.user.officeId);
   const setupOwner = can("offices.manage") || can("users.manage");
+  const pipeline = useQuery({ queryKey: ["pipeline-summary"], queryFn: () => fetchPipeline() });
+  const newLeads = useQuery({
+    queryKey: ["dashboard-new-leads"],
+    queryFn: () => fetchLeads({ data: { status: "New" } }),
+  });
+  const leads = newLeads.data ?? [];
+  const slaBreached = leads.filter((lead) => lead.slaDueAt && new Date(lead.slaDueAt) < new Date());
+  const unassigned = leads.filter((lead) => !lead.assignedToId);
+  const unanswered = pipeline.data?.unanswered ?? leads.length;
+  const openPipeline = pipeline.data?.open ?? 0;
 
   return (
     <AppShell
@@ -53,6 +67,8 @@ function Dashboard() {
       }
     >
       <div className="space-y-6">
+        <ModuleReadinessPanel title="Dashboard readiness" readiness={MODULE_READINESS.dashboard} />
+
         {setupOwner ? <Setup session={session} /> : null}
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -73,10 +89,47 @@ function Dashboard() {
           <StatCard label="Teams" value={String(session.teams.length)} icon={UsersRound} />
           <StatCard
             label="Open conversations"
-            value="—"
+            value={String(unanswered)}
             icon={MessagesSquare}
-            hint="inbox not connected"
+            hint="unanswered leads in current scope"
           />
+          <StatCard
+            label="Open pipeline"
+            value={String(openPipeline)}
+            icon={Gauge}
+            hint="excluding Won and Lost"
+          />
+        </section>
+
+        <section className="panel p-5">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="font-display text-lg">Needs attention now</h2>
+            <Badge variant={slaBreached.length ? "destructive" : "secondary"}>
+              {slaBreached.length ? `${slaBreached.length} overdue` : "No overdue items"}
+            </Badge>
+          </div>
+          <ul className="mt-3 space-y-2 text-sm">
+            <li className="flex items-center justify-between gap-3 rounded-lg bg-secondary/50 p-3">
+              <span>Unanswered leads</span>
+              <span className="font-medium">{unanswered}</span>
+            </li>
+            <li className="flex items-center justify-between gap-3 rounded-lg bg-secondary/50 p-3">
+              <span>SLA breaches</span>
+              <span className="font-medium">{slaBreached.length}</span>
+            </li>
+            <li className="flex items-center justify-between gap-3 rounded-lg bg-secondary/50 p-3">
+              <span>Unassigned new leads</span>
+              <span className="font-medium">{unassigned.length}</span>
+            </li>
+          </ul>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/leads">Open lead queue</Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/inbox">Open inbox</Link>
+            </Button>
+          </div>
         </section>
 
         <EmptyState

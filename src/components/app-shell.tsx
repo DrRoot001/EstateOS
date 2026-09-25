@@ -28,27 +28,65 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut, signOutEverywhere } from "@/lib/auth-api";
+import { MODULE_READINESS, moduleStatusLabel } from "@/lib/module-readiness";
 import { ROLES, type Permission } from "@/lib/rbac";
 import { useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 /** `perm` lists the permissions that unlock the item — any one is enough (PRD 10). */
 const nav: NavItem[] = [
-  { to: "/", label: "Dashboard", icon: Home },
-  { to: "/inbox", label: "Inbox", icon: MessagesSquare, perm: ["contacts.view"] },
-  { to: "/contacts", label: "Contacts", icon: Contact, perm: ["contacts.view"] },
-  { to: "/leads", label: "Leads", icon: Gauge, perm: ["leads.view"] },
-  { to: "/properties", label: "Properties", icon: Building2, perm: ["properties.view"] },
-  { to: "/calendar", label: "Calendar", icon: CalendarDays, perm: ["viewings.manage"] },
-  { to: "/offers", label: "Offers", icon: FileSignature, perm: ["offers.view"] },
+  { to: "/", label: "Dashboard", icon: Home, moduleKey: "dashboard" },
+  {
+    to: "/inbox",
+    label: "Inbox",
+    icon: MessagesSquare,
+    perm: ["contacts.view"],
+    moduleKey: "inbox",
+  },
+  {
+    to: "/contacts",
+    label: "Contacts",
+    icon: Contact,
+    perm: ["contacts.view"],
+    moduleKey: "contacts",
+  },
+  { to: "/leads", label: "Leads", icon: Gauge, perm: ["leads.view"], moduleKey: "leads" },
+  {
+    to: "/properties",
+    label: "Properties",
+    icon: Building2,
+    perm: ["properties.view"],
+    moduleKey: "properties",
+  },
+  {
+    to: "/calendar",
+    label: "Calendar",
+    icon: CalendarDays,
+    perm: ["viewings.manage"],
+    moduleKey: "calendar",
+  },
+  {
+    to: "/offers",
+    label: "Offers",
+    icon: FileSignature,
+    perm: ["offers.view"],
+    moduleKey: "offers",
+  },
   {
     to: "/reports",
     label: "Reports",
     icon: ChartNoAxesColumn,
     perm: ["reports.team", "reports.organization"],
+    moduleKey: "reports",
   },
-  { to: "/automation", label: "Automation", icon: Workflow, perm: ["automation.manage"] },
-  { to: "/assistant", label: "AI Assistant", icon: Sparkle },
+  {
+    to: "/automation",
+    label: "Automation",
+    icon: Workflow,
+    perm: ["automation.manage"],
+    moduleKey: "automation",
+  },
+  { to: "/assistant", label: "AI Assistant", icon: Sparkle, moduleKey: "assistant" },
 ];
 
 const secondary: NavItem[] = [
@@ -58,7 +96,7 @@ const secondary: NavItem[] = [
     icon: ShieldCheck,
     perm: ["users.manage", "offices.manage", "org.manage"],
   },
-  { to: "/notifications", label: "Notifications", icon: Bell },
+  { to: "/notifications", label: "Notifications", icon: Bell, moduleKey: "notifications" },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -67,6 +105,7 @@ type NavItem = {
   label: string;
   icon: typeof Home;
   perm?: Permission[];
+  moduleKey?: keyof typeof MODULE_READINESS;
 };
 
 export function AppShell({
@@ -121,7 +160,14 @@ export function AppShell({
               )}
             >
               <item.icon className="size-4" />
-              {item.label}
+              <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                <span className="truncate">{item.label}</span>
+                {item.moduleKey && MODULE_READINESS[item.moduleKey].status !== "ready" ? (
+                  <span className="rounded-full border border-sidebar-border px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-sidebar-foreground/80">
+                    {moduleStatusLabel(MODULE_READINESS[item.moduleKey].status)}
+                  </span>
+                ) : null}
+              </span>
             </Link>
           ))}
           <div className="my-3 h-px bg-sidebar-border" />
@@ -234,7 +280,12 @@ export function AppShell({
                     : "text-muted-foreground",
                 )}
               >
-                {item.label}
+                <span className="inline-flex items-center gap-1">
+                  {item.label}
+                  {item.moduleKey && MODULE_READINESS[item.moduleKey].status !== "ready"
+                    ? " · Planned"
+                    : ""}
+                </span>
               </Link>
             ))}
           </nav>

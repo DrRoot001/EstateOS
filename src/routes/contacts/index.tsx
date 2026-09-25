@@ -87,7 +87,7 @@ function ContactsPage() {
             icon={ContactIcon}
             title="No contacts yet"
             description="Contacts appear automatically the moment someone submits your website form or messages you, and you can add one by hand at any time."
-            action={{ label: "Connect a channel", to: "/settings" }}
+            action={{ label: "Open integrations setup", to: "/settings" }}
           />
         ) : (
           <div className="panel overflow-x-auto">

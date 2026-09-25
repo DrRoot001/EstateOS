@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { EmptyState } from "@/components/empty-state";
+import { ModuleReadinessPanel } from "@/components/module-readiness-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +17,7 @@ import {
   fetchConversations,
   replyToConversation,
 } from "@/lib/crm-api";
+import { MODULE_READINESS } from "@/lib/module-readiness";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/inbox")({
@@ -66,56 +68,59 @@ function InboxPage() {
         </Tabs>
       }
     >
-      {conversations.length === 0 && !list.isLoading ? (
-        <EmptyState
-          icon={MessageSquare}
-          title="No conversations yet"
-          description="Connect a website form, an inbox or WhatsApp and every enquiry lands here as a thread against the person who sent it — answered from EstateOS, not from Gmail."
-          action={{ label: "Connect a channel", to: "/settings" }}
-        />
-      ) : (
-        <div className="grid gap-4 lg:grid-cols-[minmax(260px,340px)_1fr]">
-          <section className="panel divide-y divide-border overflow-hidden">
-            {conversations.map((c) => {
-              const Icon = CHANNEL_ICON[c.channel as keyof typeof CHANNEL_ICON] ?? MessageSquare;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => setOpenId(c.id)}
-                  className={cn(
-                    "flex w-full items-start gap-3 p-3 text-left transition-colors hover:bg-secondary/60",
-                    selectedId === c.id && "bg-secondary",
-                  )}
-                >
-                  <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2">
-                      <span className={cn("truncate text-sm", c.unread && "font-semibold")}>
-                        {c.contact.name}
+      <div className="space-y-4">
+        <ModuleReadinessPanel title="Inbox readiness" readiness={MODULE_READINESS.inbox} />
+        {conversations.length === 0 && !list.isLoading ? (
+          <EmptyState
+            icon={MessageSquare}
+            title="No conversations yet"
+            description="Connect a website form, an inbox or WhatsApp and every enquiry lands here as a thread against the person who sent it — answered from EstateOS, not from Gmail."
+            action={{ label: "Open integrations setup", to: "/settings" }}
+          />
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-[minmax(260px,340px)_1fr]">
+            <section className="panel divide-y divide-border overflow-hidden">
+              {conversations.map((c) => {
+                const Icon = CHANNEL_ICON[c.channel as keyof typeof CHANNEL_ICON] ?? MessageSquare;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setOpenId(c.id)}
+                    className={cn(
+                      "flex w-full items-start gap-3 p-3 text-left transition-colors hover:bg-secondary/60",
+                      selectedId === c.id && "bg-secondary",
+                    )}
+                  >
+                    <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span className={cn("truncate text-sm", c.unread && "font-semibold")}>
+                          {c.contact.name}
+                        </span>
+                        {c.leadStatus ? (
+                          <Badge variant="secondary" className="shrink-0">
+                            {c.leadStatus}
+                          </Badge>
+                        ) : null}
                       </span>
-                      {c.leadStatus ? (
-                        <Badge variant="secondary" className="shrink-0">
-                          {c.leadStatus}
-                        </Badge>
-                      ) : null}
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {c.subject}
+                      </span>
+                      <span className="block text-xs text-muted-foreground">
+                        {new Date(c.lastMessageAt).toLocaleString()}
+                      </span>
                     </span>
-                    <span className="block truncate text-xs text-muted-foreground">
-                      {c.subject}
-                    </span>
-                    <span className="block text-xs text-muted-foreground">
-                      {new Date(c.lastMessageAt).toLocaleString()}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </section>
+                  </button>
+                );
+              })}
+            </section>
 
-          {selectedId ? (
-            <Thread conversationId={selectedId} onChanged={() => list.refetch()} />
-          ) : null}
-        </div>
-      )}
+            {selectedId ? (
+              <Thread conversationId={selectedId} onChanged={() => list.refetch()} />
+            ) : null}
+          </div>
+        )}
+      </div>
     </AppShell>
   );
 }
